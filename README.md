@@ -1,7 +1,7 @@
 README
 Circular Horizontal Gradient (CHG) Method
 
-This repository contains MATLAB codes and datasets used to compute the Circular Horizontal Gradient (CHG), Total Horizontal Gradient (THG), and Signal-to-Noise Ratio (SNR) for both synthetic models and real gravity data from Lombok Island including Samalas Volcano (Lombok_Final2.mat) and Tambora Volcano (Tambora_Final2.mat), Indonesia.
+This repository contains MATLAB codes and datasets used to compute the Circular Horizontal Gradient (CHG), Total Horizontal Gradient (THG), and Signal-to-Noise Ratio (SNR) for both synthetic models and real gravity data from Lombok Island including Samalas Volcano (Lombok_Final2.mat) and Tambora Volcano (Tambora_Final2.mat), Indonesia. Tambora_Final2.mat has been regridded to a grid spacing that is twice as large, reducing the dataset size and making it suitable for upload to this site.
 
 Software Requirements
 MATLAB R2020a or later
