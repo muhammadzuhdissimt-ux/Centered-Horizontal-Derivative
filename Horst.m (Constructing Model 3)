@@ -1,0 +1,63 @@
+%==========================================================================
+% Modelling Anomaly of Horst Structure (Model 3)
+%==========================================================================
+% By: Muhammad Zuhdi, Wiwit Suryanto, Sudarmaji
+% Corresponding author: Wiwit Suryanto 
+% e-mail: ws@ugm.ac.id
+% Doctoral Program, Ptysics Department
+% Faculty of Mathematic and Natural Sciences
+% Gadjah Mada University
+%==========================================================================
+
+clc;
+clear;
+ 
+%% Ukuran matriks
+N=2000;
+ 
+%% Inisialisasi matriks nol
+A=zeros(N,N);
+ 
+%% Parameter segitiga
+height_tri=2000;
+base_tri  =1000;
+ 
+%% Titik tengah horizontal
+xc=N/2;
+ 
+%% Posisi vertikal
+% Puncak di atas,alas di bawah
+y_top   =1;
+y_bottom=height_tri;
+ 
+%% Membentuk segitiga
+for y=y_top:y_bottom
+    
+    % Lebar segitiga pada setiap ketinggian
+    half_width=(base_tri/2)*((y-y_top)/(height_tri-1));
+    
+    % Batas kiri dan kanan
+    x_left =round(xc-half_width);
+    x_right=round(xc+half_width);
+    
+    % Isi bagian dalam segitiga dengan 1
+    A(y,x_left:x_right)=1;
+    
+end
+ 
+m=A(501:1500,501:1500);
+%Kernel
+xx=1:100;
+yy=1:100;
+[XX,YY]=meshgrid(xx,yy);
+G=1;
+d=30;
+mm=1;
+V=G*mm./((XX-10).^2+(YY-10).^2+d^2);
+%Convolution of m and V
+g=conv2(m,V);
+g=g(101:900,101:900);
+xx=1:size(g,2);
+yy=1:size(g,1);
+[xgrid,ygrid]=meshgrid(xx,yy);
+mesh(g); colormap jet;
