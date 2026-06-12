@@ -1,0 +1,200 @@
+%==========================================================================
+% Center Optimization by click and drag
+%==========================================================================
+% By: Muhammad Zuhdi, Wiwit Suryanto, Sudarmaji
+% Corresponding author: Wiwit Suryanto 
+% e-mail: ws@ugm.ac.id
+% Doctoral Program, Ptysics Department
+% Faculty of Mathematic and Natural Sciences
+% Gadjah Mada University
+%==========================================================================
+
+% ==========================================================
+figure('Name','Crop Matrix','NumberTitle','off');
+ 
+imagesc(g);
+axis image;
+colormap(jet);
+colorbar;
+ 
+title('Click and drag to crop');
+ 
+%===========================================================
+% INTERACTIVE CROP
+% ==========================================================
+h=drawrectangle('Color','r');
+ 
+% Wait until user finishes drawing
+wait(h);
+ 
+% Get rectangle position
+pos=round(h.Position);
+ 
+% Position format:
+% [x y width height]
+ 
+x1=max(1,pos(1));
+y1=max(1,pos(2));
+ 
+x2=min(size(g,2),x1+pos(3));
+y2=min(size(g,1),y1+pos(4));
+ 
+%===========================================================
+% CROP MATRIX
+% ==========================================================
+g_crop=g(y1:y2,x1:x2);
+ 
+%===========================================================
+% SHOW RESULT
+% ==========================================================
+figure('Name','Cropped Result','NumberTitle','off');
+ 
+imagesc(g_crop);
+axis image;
+colormap(jet);
+colorbar;
+ 
+title('Cropped Matrix');
+ 
+%s===========================================================
+% OPTIONAL: SAVE RESULT
+% ==========================================================
+% save('cropped_data.mat','g_crop');
+ 
+disp('Cropping selesai!');
+gc=g_crop;
+
+tic
+[nrows,ncols]=size(gc);
+ 
+%============================================================
+% DISPLAY DATA
+% ===========================================================
+ 
+figure;
+imagesc(gc);
+axis image;
+colormap (jet);
+colorbar;
+title('Gravity Anomaly');
+ 
+%% ==========================================================
+% INITIAL ESTIMATE USING WEIGHTED CENTROID
+% ===========================================================
+ 
+[X,Y]=meshgrid(1:ncols,1:nrows);
+ 
+w=abs(gc);
+ 
+xc0=sum(sum(X.*w))/sum(w(:));
+yc0=sum(sum(Y.*w))/sum(w(:));
+ 
+fprintf('Initial estimate:\n');
+fprintf('xc0=%.2f\n',xc0+x1);
+fprintf('yc0=%.2f\n',yc0+x2);
+ 
+%============================================================
+% SEARCH WINDOW
+% ===========================================================
+ 
+search_radius=30;
+ 
+xmin=round(max(5, xc0-search_radius));
+xmax=round(min(ncols-5, xc0+search_radius));
+ 
+ymin=round(max(5, yc0-search_radius));
+ymax=round(min(nrows-5, yc0+search_radius));
+ 
+%============================================================
+% OPTIMIZATION
+% ===========================================================
+ 
+score_map=nan(nrows,ncols);
+ 
+dr=1;   % radial bin size
+ 
+for yc=ymin:ymax
+    
+    for xc=xmin:xmax
+        
+        % radial distance
+        r=sqrt((X-xc).^2+(Y-yc).^2);
+        
+        rmax=floor(max(r(:)));
+        
+        total_var=0;
+        count=0;
+        
+        % radial bins
+        for rr=1:dr:rmax-dr
+            
+            mask=(r >= rr) & (r < rr+dr);
+            
+            vals=gc(mask);
+            
+            if numel(vals) > 10
+                
+                % variance within same radius
+                v=var(vals);
+                
+                total_var=total_var+v;
+                count=count+1;
+            end
+        end
+        
+        % average radial variance
+        score_map(yc,xc)=total_var/count;
+        
+    end
+end
+ 
+%============================================================
+% FIND OPTIMAL CENTER
+% ===========================================================
+ 
+[minscore,idx]=min(score_map(:));
+ 
+[yc_opt,xc_opt]=ind2sub(size(score_map),idx);
+ xc=xc_opt+x1;
+ yc=yc_opt+y1;
+fprintf('\nOptimized center:\n');
+fprintf('xc=%.2f\n',xc);
+fprintf('yc=%.2f\n',yc);
+fprintf('score=%.6f\n',minscore);
+ 
+%============================================================
+% DISPLAY RESULT
+% ===========================================================
+ 
+figure;
+imagesc(gc);
+axis image;
+colormap (jet);
+colorbar;
+title('Detected Center');
+ 
+hold on;
+ 
+plot(xc0,yc0,'wo','MarkerSize',12,'LineWidth',2);
+plot(xc_opt,yc_opt,'r+','MarkerSize',18,'LineWidth',3);
+ 
+legend('Initial Estimate','Optimized Center');
+ 
+%============================================================
+% DISPLAY SCORE MAP
+% ===========================================================
+ 
+figure;
+imagesc(score_map);
+axis image;
+colorbar;
+title('Radial Variance Objective Function');
+ 
+hold on;
+plot(xc_opt,yc_opt,'r+','MarkerSize',18,'LineWidth',3);
+ 
+toc
+ 
+% END
+%==========================================================================
+
