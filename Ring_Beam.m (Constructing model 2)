@@ -1,0 +1,87 @@
+%==========================================================================
+% Modelling Moderate Radial and Tangential Anomaly (Model 2)
+%==========================================================================
+% By: Muhammad Zuhdi, Wiwit Suryanto, Sudarmaji
+% Corresponding author: Wiwit Suryanto 
+% e-mail: ws@ugm.ac.id
+% Doctoral Program, Ptysics Department
+% Faculty of Mathematic and Natural Sciences
+% Gadjah Mada University
+%==========================================================================
+ 
+N=1000;
+[x, y]=meshgrid(1:N,1:N);
+ 
+% Grid center--------------------------------------------------------------
+xo=(N+1)/2;
+co=(N+1)/2;
+ 
+% Convert to polar coordinates---------------------------------------------
+X=x-xo;
+Y=y-co;
+R=sqrt(X.^2+Y.^2);      
+Theta=atan2(Y, X);        
+ 
+% Number of angular beams-------------------------------------------------- 
+n=8;                
+beam=abs(sawtooth(n*Theta,0.5));
+ 
+% Triangular annular ring--------------------------------------------------
+r1=0;                % radius 1
+r2=100;              % radius 2
+r3=225;              % radius 3
+ 
+ring=zeros(N);
+ 
+% Shaping beam (triangel)--------------------------------------------------
+rs=(R >= r1) & (R <= r2);
+ring(rs)=(r2 - r1)/(r2 - r1);
+ 
+% Decreasing---------------------------------------------------------------
+fs=(R > r2) & (R <= r3);
+ring(fs)=(r3 - R(fs)) / (r3 - r2);
+ 
+% Triangular annular ring 2------------------------------------------------
+ 
+r1=325;                % inner radius
+r2=400;                % peak radius
+r3=475;                % outer radius
+ 
+ring2=zeros(N);
+ 
+% Rising slope (inner radius to peak)
+idx1=(R >= r1) & (R <= r2);
+ring2(idx1)=(R(idx1) - r1) / (r2 - r1);
+ 
+% Falling slope (peak to outer radius)
+idx2=(R > r2) & (R <= r3);
+ring2(idx2) =(r3 - R(idx2)) / (r3 - r2);
+ 
+% Superposition------------------------------------------------------------
+sup1=max(beam, ring);
+sup=max(sup1, ring2);
+ 
+%Convolution---------------------------------------------------------------
+%Kernel
+xx=1:20;
+yy=1:20;
+[XX,YY]=meshgrid(xx,yy);
+G=1;
+d=10;
+mm=1;
+V=G*mm./((XX-10).^2+(YY-10).^2+d^2);
+%Convolution of m and V
+gg=conv2(sup,V);
+g=gg(20:1000,20:1000);
+mesh(gg); colormap jet;
+xx=1:size(g,2);
+yy=1:size(g,1);
+[xgrid,ygrid]=meshgrid(xx,yy);
+ 
+% Figuring-----------------------------------------------------------------
+figure;
+imagesc(gg);
+axis image off;
+colormap(gray);
+colorbar;
+title('Slopes Example');
