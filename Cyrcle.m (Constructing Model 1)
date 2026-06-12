@@ -1,0 +1,68 @@
+%==========================================================================
+% Modelling Highly Radial and Tangential Anomaly (Model 1)
+%==========================================================================
+% By: Muhammad Zuhdi, Wiwit Suryanto, Sudarmaji
+% Corresponding author: Wiwit Suryanto 
+% e-mail: ws@ugm.ac.id
+% Doctoral Program, Ptysics Department
+% Faculty of Mathematic and Natural Sciences
+% Gadjah Mada University
+%==========================================================================% =========================================================================
+
+%Lapisan 
+x=1:1000;
+y=1:1000;
+m=zeros(1000,1000);
+[X,Y]=meshgrid(x,y);
+for i=1:1000;
+    for j=1:1000;
+        if (i-500)^2+(j-500)^2<=180000;
+        m(i,j)=1;
+        end
+    end
+end     
+for i=1:1000;
+    for j=1:1000;
+        if (i-500)^2+(j-500)^2<=150000;
+        m(i,j)=0;
+        end
+    end
+end  
+N=1000;
+thick=50;
+for i=1:N;
+    % Diagonal 1 (upper left to lower right)
+    for t=-floor(thick/2):floor(thick/2);
+        if i+t >=1 && i+t <= N;
+            m(i, i+t)=1;
+        end
+    end
+ 
+    % Diagonal 2 (upper right to lower left)
+    j=N - i+1;
+    for t=-floor(thick/2):floor(thick/2);
+        if j+t >= 1 && j+t <= N;
+            m(i, j+t)=1;
+        end
+    end
+end
+m(485:515,:)=1;
+m(:,485:515)=1;
+ 
+%Kernel
+xx=1:20;
+yy=1:20;
+[XX,YY]=meshgrid(xx,yy);
+G=1;
+d=10;
+mm=1;
+V=G*mm./((XX-10).^2+(YY-10).^2+d^2);
+%==========================================================================
+%Convolution of m and V
+%==========================================================================
+gg=conv2(m,V);
+g=gg(20:1000,20:1000);
+xx=1:size(g,2);
+yy=1:size(g,1);
+[xgrid,ygrid]=meshgrid(xx,yy);
+mesh(g); colormap jet;
